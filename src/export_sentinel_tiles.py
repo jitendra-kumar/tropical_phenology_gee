@@ -1,11 +1,12 @@
 import ee, geemap, os, time
+ee.Initialize()
 
 # Import admin data and select Amazonia to create grid around
 br = (ee.FeatureCollection("FAO/GAUL/2015/level1")
        .filterMetadata('ADM0_NAME', 'equals', 'Brazil')
        .filterMetadata('ADM1_NAME', 'equals', 'Amazonas')
       )
-print("Feature collection of Amazonas loaded.)
+print("Feature collection of Amazonas loaded.")
 
 # Create grid
 # https://developers.google.com/earth-engine/tutorials/community/drawing-tools
@@ -58,10 +59,9 @@ for d in feats:
     
 # Create a list of several ee.Geometry.Polygons
 polys = []
-for i in a_range:
-    for coord in coord_list:
-        poly = ee.Geometry.Polygon(coord)
-        polys.append(poly)
+for coord in coord_list:
+	poly = ee.Geometry.Polygon(coord)
+	polys.append(poly)
         
 
 # Make grid smaller if it's huge
