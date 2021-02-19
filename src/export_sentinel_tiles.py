@@ -65,7 +65,7 @@ for coord in coord_list:
         
 
 # Make grid smaller if it's huge
-idx = list(range(0,100))
+idx = list(range(100,151))
 polys = [ polys[i] for i in idx]
 
 
@@ -237,7 +237,7 @@ print("Monthly step created.")
 # Make a list of file names
 tiles = []
 sitename = 'amazonia'
-for num in range(len(all_cols)):
+for num in range(100,151):
     index = str(sitename + '_{}'.format(num))
     tiles.append(index)
 print("Files to be created:\n" + str(tiles))
@@ -251,8 +251,8 @@ for a_col, a_tile, poly in zip(all_cols, tiles, polys):
         if len(ee.Image(ilist.get(i)).bandNames().getInfo()) <= 0:
             print("ERROR; No bands found in image index %d... will skip export."%(i))
         else:
-            filename = "/data/6ru/{}/{}.tif".format(a_tile,i)
-            temp_dir = "/data/6ru/{}/".format(a_tile)
+            filename = "/data/6ru/sentinel_2/amazonia/{}/{}.tif".format(a_tile,i)
+            temp_dir = "/data/6ru/sentinel_2/amazonia/{}/".format(a_tile)
             if not os.path.exists(temp_dir):
                 os.mkdir(temp_dir)
             if os.path.exists(filename):
