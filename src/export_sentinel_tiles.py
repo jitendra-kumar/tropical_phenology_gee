@@ -65,7 +65,7 @@ for coord in coord_list:
         
 
 # Make grid smaller if it's huge
-idx = list(range(100,151))
+idx = list(range(151,201))
 polys = [ polys[i] for i in idx]
 
 
@@ -237,7 +237,7 @@ print("Monthly step created.")
 # Make a list of file names
 tiles = []
 sitename = 'amazonia'
-for num in range(100,151):
+for num in range(151,201):
     index = str(sitename + '_{}'.format(num))
     tiles.append(index)
 print("Files to be created:\n" + str(tiles))
