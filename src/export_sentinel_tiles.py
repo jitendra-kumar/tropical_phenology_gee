@@ -1,12 +1,20 @@
 import ee, geemap, os, time
 ee.Initialize()
 
+# Set your stuff 
+SITE='Rondonia' #Select from 'Amazona' or 'Rondonia' for now
+GRIDSIZE=55000 #55km
+IDX=[64] #Select range of data to export (I do 100 at a time) or [64] for Rondonia test site
+BIWEEKLY=1 #Select this one or MONTHLY
+MONTHLY=0
+OUTPATH='/data/6ru/sentinel_2' #Don't include final slash
+
 # Import admin data and select Amazonia to create grid around
 br = (ee.FeatureCollection("FAO/GAUL/2015/level1")
        .filterMetadata('ADM0_NAME', 'equals', 'Brazil')
-       .filterMetadata('ADM1_NAME', 'equals', 'Amazonas')
+       .filterMetadata('ADM1_NAME', 'equals', SITE)
       )
-print("Feature collection of Amazonas loaded.")
+print("Feature collection of {} loaded.".format(SITE))
 
 # Create grid
 # https://developers.google.com/earth-engine/tutorials/community/drawing-tools
@@ -44,8 +52,7 @@ def make_grid(region, a_scale):
     
     
 # Make your grid superimposed over Amazonia and limit tiles to 100
-grid_55km = make_grid(br, 55000)
-
+grid_55km = make_grid(br, GRIDSIZE)
 
 # Create dictionary of grid coordinates
 grid_dict = grid_55km.getInfo()
@@ -60,18 +67,18 @@ for d in feats:
 # Create a list of several ee.Geometry.Polygons
 polys = []
 for coord in coord_list:
-	poly = ee.Geometry.Polygon(coord)
-	polys.append(poly)
+    poly = ee.Geometry.Polygon(coord)
+    polys.append(poly)
         
 
 # Make grid smaller if it's huge
-idx = list(range(151,201))
-polys = [ polys[i] for i in idx]
+#idx = list(range(151,201))
+polys = [ polys[i] for i in IDX]
 
 
 # Make the whole grid a feature collection for export purposes
 grid = ee.FeatureCollection(polys)
-print("55 km grid created around Amazona.")
+print("55 km grid created around {}.".format(SITE))
 
 
 # Set variables for cloud mask
@@ -202,6 +209,7 @@ mskd_col = s2_sr.select('B5', 'B8')
 calc_ndre_mskd_imgs = mskd_col.map(ndre_band)
 ndre_mskd_col = calc_ndre_mskd_imgs.select('NDRE')
 
+
 # Clip NDRE images to grid squares
 clipped_cols = []
 for poly in polys:
@@ -213,31 +221,54 @@ print("NDRE clipped to tiles.")
 
 #Monthly step
 #https://gis.stackexchange.com/questions/301165/how-to-get-monthly-averages-from-earth-engine-in-the-python-api
-months = ee.List.sequence(1, 12)
-years = ee.List.sequence(2017, 2020)
+if MONTHLY == 1:
+    months = ee.List.sequence(1, 12)
+    years = ee.List.sequence(2017, 2020)
 
-all_cols = []
-for a_col in clipped_cols:
-    def byYear(y):
-        def byMonth(m):
-            return (a_col
-                    .filter(ee.Filter.calendarRange(y, y, 'year'))
-                    .filter(ee.Filter.calendarRange(m, m, 'month'))
-                    .median() # Find median NDRE for a month
-                    .set('month', m)
-                    .set('year', y)
-                   )
-        return months.map(byMonth)
+    all_cols = []
+    for a_col in clipped_cols:
+        def byYear(y):
+            def byMonth(m):
+                return (a_col
+                        .filter(ee.Filter.calendarRange(y, y, 'year'))
+                        .filter(ee.Filter.calendarRange(m, m, 'month'))
+                        .max() # Find max NDRE for a month
+                        .set('month', m)
+                        .set('year', y)
+                       )
+            return months.map(byMonth)
 
-    col = ee.ImageCollection.fromImages(years.map(byYear).flatten())
-    all_cols.append(col)
-print("Monthly step created.")
+        col = ee.ImageCollection.fromImages(years.map(byYear).flatten())
+        all_cols.append(col)
+    print("Monthly step created.")
+    
+if BIWEEKLY == 1:
+    years = ee.List.sequence(2017, 2020)
+    step = ee.List.sequence(1, 365, 15)
+
+    all_cols = []
+    for a_col in clipped_cols:
+        def byYear(y):
+            y = ee.Number(y)
+            def byStep(d):
+                d = ee.Number(d)
+                return (a_col
+                        .filter(ee.Filter.calendarRange(y, y, 'year')) #yearly step
+                        .filter(ee.Filter.calendarRange(d, d.add(14), 'day_of_year')) #15-day step
+                        .max()
+                        .set('step', [d, y])) #Add properties
+
+            return step.map(byStep)
+
+        col = ee.ImageCollection.fromImages(years.map(byYear).flatten())
+        all_cols.append(col)
+    print("Biweekly (15-day) step created.")
       
 
 # Make a list of file names
 tiles = []
-sitename = 'amazonia'
-for num in range(151,201):
+sitename = SITE.lower()
+for num in range(len(all_cols)):
     index = str(sitename + '_{}'.format(num))
     tiles.append(index)
 print("Files to be created:\n" + str(tiles))
@@ -247,12 +278,13 @@ print("Files to be created:\n" + str(tiles))
 tic1 = time.time()
 for a_col, a_tile, poly in zip(all_cols, tiles, polys):
     ilist = a_col.toList(a_col.size())
-    for i in range(12*4):
+    length = a_col.size().getInfo()
+    for i in range(length):
         if len(ee.Image(ilist.get(i)).bandNames().getInfo()) <= 0:
             print("ERROR; No bands found in image index %d... will skip export."%(i))
         else:
-            filename = "/data/6ru/sentinel_2/amazonia/{}/{}.tif".format(a_tile,i)
-            temp_dir = "/data/6ru/sentinel_2/amazonia/{}/".format(a_tile)
+            filename = "{}/{}/{}/{}.tif".format(OUTPATH, sitename, a_tile,i)
+            temp_dir = "{}/{}/{}/".format(OUTPATH, sitename, a_tile)
             if not os.path.exists(temp_dir):
                 os.mkdir(temp_dir)
             if os.path.exists(filename):
