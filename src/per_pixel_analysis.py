@@ -771,3 +771,23 @@ fig.suptitle(f'1025/ Lag : {lag}\n', fontsize=14)
 fig.tight_layout()
 fig.savefig(save_path + 'smooth_ori_1025.png')
 #plt.show()
+
+
+# Creating a summary of attribution for list ramdom variables
+
+dict_attr_codes = {}
+for lag in dict_attr_smooth_ano_1025 .keys():
+    dict_attr_codes["lag "+str(lag)] = dict_attr_smooth_ano_1025[lag].sum(axis=0) / (np.array(list(Codes.keys()))+lag)
+
+df_attr_summary = pd.DataFrame.from_dict(dict_attr_codes)
+df_attr_summary.index = Codes.keys()
+df_attr_summary.to_csv(save_path + "Attr_Summary.csv", sep=",")
+print (df_attr_summary)
+
+fig,axs = plt.subplots(tight_layout = True, figsize = (12,5))
+df_attr_summary.plot(ax = axs, kind = 'bar', width = .7)
+axs.grid()
+axs.set_ylabel ("Count of Attr Code", fontsize =14)
+axs.set_xlabel ("Attr Codes", fontsize =14)
+plt.title(file_head)
+fig.savefig(save_path + "Attribution_bar.png")
