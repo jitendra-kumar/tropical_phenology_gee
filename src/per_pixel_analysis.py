@@ -124,7 +124,7 @@ def Calc_Anomalies (data_ar):
 
 
 # Random selection of pixels
-list_random_pixels = random.sample(list(np.arange(100000)), 25)
+list_random_pixels = random.sample(list(np.arange(Data['ori']['smooth']['ndre'].shape[0])), 25)
 
 # Or add the pixels manually
 # list_random_pixels = [134, 4563, 5553]
