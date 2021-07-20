@@ -78,8 +78,9 @@ if True:
     filesnames ['ano']['interp']['ndre'] = base + file_head + '_ano.interp'
 
 # Reading all data of ori, ano, vars and ndre_kind
-ts_type = "ori"
-for attr_type in attr_types:
+#for attr_type in attr_types:  # for testing when you have anomaly files
+attr_type = "ori"
+if True:
     if attr_type == "ano": sep_type =','
     if attr_type == "ori": sep_type =' '
         

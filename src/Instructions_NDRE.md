@@ -4,7 +4,7 @@
 Follow the commands one by one:
 
 ```
-conda create --name da_ndre python=3.7 numpy scipy ipython pandas
+conda create --name da_ndre python=3.7 numpy scipy ipython pandas matplotlib 
 conda activate da_ndre
 pip install mpi4py
 ```
