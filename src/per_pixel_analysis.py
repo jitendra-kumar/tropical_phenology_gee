@@ -633,7 +633,7 @@ for ax, row in zip(axes[:,0], list_random_pixels):
 fig.suptitle(f'Lag: {lag}\n', fontsize=14)
 fig.tight_layout()
 fig.savefig(save_path + 'smooth_ano_quar.png')
-plt.show()
+#plt.show()
 
 # ---
 
@@ -679,7 +679,7 @@ for ax, row in zip(axes[:,0], list_random_pixels):
 fig.suptitle(f'Lag: {lag}\n', fontsize=14)
 fig.tight_layout()
 fig.savefig(save_path + 'smooth_ori_quar.png')
-plt.show()
+#plt.show()
 
 # ---
 lag = 0
@@ -725,7 +725,7 @@ for ax, row in zip(axes[:,0], list_random_pixels):
 fig.suptitle(f'1025/ Lag: {lag}\n', fontsize=14)
 fig.tight_layout()
 fig.savefig(save_path + 'smooth_ano_1025.png')
-plt.show()
+#plt.show()
 
 
 lag = 0
@@ -770,4 +770,4 @@ for ax, row in zip(axes[:,0], list_random_pixels):
 fig.suptitle(f'1025/ Lag : {lag}\n', fontsize=14)
 fig.tight_layout()
 fig.savefig(save_path + 'smooth_ori_1025.png')
-plt.show()
+#plt.show()
