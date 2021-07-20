@@ -31,6 +31,17 @@ file_TAS   = str   (args.filename_Temp)
 save_ext_loc = str   (args.save_ext_loc)
 attr_type = str   (args.attribution_type)
 
+# Running the file
+#New Version : `detection_disturbance_with_loc.py`
+#  * Saves locations of extremes if required , `-save_loc y` or `-save_loc yes`
+#  * will gerenetate different directory for smooth and interp files
+#time srun -n 32 python /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/Detection_Attribution/detection_disturbance_with_loc.py \
+#        -f_ndre /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.smooth \
+#        -f_pr /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.precip \
+#        -f_tas /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.temp \
+#        -save_loc no
+
+
 
 # Reading the data
 # ================
@@ -137,8 +148,10 @@ Codes = {
 
 
 
-def Attribution_Drivers_Codes (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
+def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
     """
+    Similar to Attribution_Drivers_Codes, but here we compare the driver during 10p of NDRE with 25q of its own value and remove all grids with negative values
+    
     Checks the climatic conditions during negative and postive NDRE extremes at a pixel.
     Assigns codes of attributions.
      
@@ -171,88 +184,87 @@ def Attribution_Drivers_Codes (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
         ts_ndre_ano = ts_ndre_ano[lag:]
         ts_pr_ano   = ts_pr_ano  [:-lag]
         ts_tas_ano  = ts_tas_ano [:-lag]
-    
+
     # initializing the codes array per pixel with zeros and will fill as conditions are met
     ts_codes_px = np.zeros((len(Codes)))
-    
+
     ts_ndre_ano_non_mask_vals = ts_ndre_ano[~ts_ndre_ano.mask]
-    if ts_ndre_ano_non_mask_vals.size < 50:
+    if ts_ndre_ano_non_mask_vals.size < 75-int(lag) : 
         code_px = 999
         ts_codes_px[0] = code_px
         # Printing zeros for location of extremes
-        loc_25q = np.zeros((75-int(lag)))
-        loc_75q = np.zeros((75-int(lag)))
+        loc_10q = np.zeros((75-int(lag)))
+        loc_90q = np.zeros((75-int(lag)))
     else:
-        # Mean value of NDRE anomalies of 25th quarlite
-        loc_25q = ts_ndre_ano<np.percentile(ts_ndre_ano_non_mask_vals,25)
-        px_ndre_25q = ts_ndre_ano[loc_25q].mean()
-        # Mean value of NDRE anomalies of 75th quarlite
-        loc_75q = ts_ndre_ano>np.percentile(ts_ndre_ano_non_mask_vals,75)
-        px_ndre_75q = ts_ndre_ano[loc_75q].mean()
-        
-        # Mean precipiration and temperature during < 25q NDRE
-        pr_du_neg  = ts_pr_ano[loc_25q].mean()
-        tas_du_neg = ts_tas_ano[loc_25q].mean()
-        # Mean precipiration and temperature during > 75q NDRE
-        pr_du_pos  = ts_pr_ano[loc_75q].mean()
-        tas_du_pos = ts_tas_ano[loc_75q].mean()
-        
+        # Mean value of NDRE anomalies of 10th quarlite
+        loc_10q = ts_ndre_ano<np.percentile(ts_ndre_ano_non_mask_vals,10)
+        px_ndre_10q = ts_ndre_ano[loc_10q].mean()
+        # Mean value of NDRE anomalies of 90th quarlite
+        loc_90q = ts_ndre_ano>np.percentile(ts_ndre_ano_non_mask_vals,90)
+        px_ndre_90q = ts_ndre_ano[loc_90q].mean()
+
+        # Mean precipiration and temperature during < 10q NDRE
+        pr_du_neg  = ts_pr_ano[loc_10q].mean()
+        tas_du_neg = ts_tas_ano[loc_10q].mean()
+        # Mean precipiration and temperature during > 90q NDRE
+        pr_du_pos  = ts_pr_ano[loc_90q].mean()
+        tas_du_pos = ts_tas_ano[loc_90q].mean()
+
         # 25q of precipitation
         pr_25q = np.percentile(ts_pr_ano,25)
         # 75q of precipitation
         pr_75q = np.percentile(ts_pr_ano,75)
-        
+
         # 25q of tas
         tas_25q = np.percentile(ts_tas_ano,25)
         # 75q of tas
         tas_75q = np.percentile(ts_tas_ano,75)
-        
-        if pr_du_neg < pr_25q : 
+
+        if pr_du_neg < pr_25q :
             # neg NDRE ext driven by dry : 10+ lag
             code_px = 10+ lag
             ts_codes_px[1] = code_px
-        if tas_du_neg > tas_75q : 
+        if tas_du_neg > tas_75q :
             # neg NDRE ext driven by hot : 20+ lag
             code_px = 20+ lag
             ts_codes_px[2] = code_px
-        if pr_du_neg > pr_75q : 
+        if pr_du_neg > pr_75q :
             # neg NDRE ext driven by wet : 30+ lag
             code_px = 30+ lag
             ts_codes_px[3] = code_px
-        if tas_du_neg < tas_25q : 
+        if tas_du_neg < tas_25q :
             # neg NDRE ext driven by cold : 40+ lag
             code_px = 40+ lag
             ts_codes_px[4] = code_px
-            
-        if pr_du_pos < pr_25q : 
+
+        if pr_du_pos < pr_25q :
             # pos NDRE ext driven by dry : 60+ lag
             code_px = 60+ lag
             ts_codes_px[5] = code_px
-        if tas_du_pos > tas_75q : 
+        if tas_du_pos > tas_75q :
             # pos NDRE ext driven by hot : 70+ lag
             code_px = 70+ lag
             ts_codes_px[6] = code_px
-        if pr_du_pos > pr_75q : 
+        if pr_du_pos > pr_75q :
             # pos NDRE ext driven by wet : 80+ lag
             code_px = 80+ lag
             ts_codes_px[7] = code_px
-        if tas_du_pos < tas_25q : 
+        if tas_du_pos < tas_25q :
             # pos NDRE ext driven by cold : 90+ lag
             code_px = 90+ lag
             ts_codes_px[8] = code_px
-            
+
         if (10 in ts_codes_px) and (20 in ts_codes_px):
             # neg NDRE ext driven by dry and dry : 100 + lag
             code_px = 100+ lag
             ts_codes_px[9] = code_px
-        
+
         if (80 in ts_codes_px) and (90 in ts_codes_px):
             # pos NDRE ext driven by wet and cold : 110 + lag
             code_px = 110 + lag
             ts_codes_px[10] = code_px
-            
-    return ts_codes_px, loc_25q, loc_75q
 
+    return ts_codes_px, loc_10q, loc_90q
 
 
 # After this every rank will do a part of the calculations
@@ -276,7 +288,7 @@ for lag in range(6):
         ts_ndre_ano = data_NDRE_anomalies[rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
         ts_pr_ano   = data_PR_anomalies  [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
         ts_tas_ano  = data_TAS_anomalies[rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
-        attr_ar[i],ar_loc_neg[i],ar_loc_pos[i] = Attribution_Drivers_Codes (ts_ndre_ano, ts_pr_ano, ts_tas_ano, lag=lag)
+        attr_ar[i],ar_loc_neg[i],ar_loc_pos[i] = Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano, lag=lag)
 
         # Saving attribution data
         # -----------------------
