@@ -1,7 +1,10 @@
 # Contact: Bharat Sharma for questions
+# To analyse new location update line 66,67
 
 # Import data
 import numpy as np
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import random
@@ -59,10 +62,11 @@ Data ['ori'] ['interp']= {}
 Data ['ano'] ['smooth']= {}
 Data ['ano'] ['interp']= {}
 
-base = '/gpfs/alpine/cli137/proj-shared/6ru/costa_rica/costa_rica_biweekly/costa_rica_biweekly_49'
-file_head = "/costa_rica_biweekly_49_timeseries.split.13"
+# Update for new values
+base = '/gpfs/alpine/cli137/proj-shared/6ru/costa_rica/costa_rica_biweekly/costa_rica_biweekly_62'
+file_head = "/costa_rica_biweekly_62_timeseries.split.12"
 
-save_path = "/gpfs/alpine/cli137/proj-shared/6ru/plots/" + file_head + '/.'
+save_path = "/gpfs/alpine/cli137/proj-shared/6ru/plots/" + file_head + '/'
 if os.path.isdir(save_path) == False:
     os.makedirs(save_path)
 
