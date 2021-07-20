@@ -63,8 +63,8 @@ Data ['ano'] ['smooth']= {}
 Data ['ano'] ['interp']= {}
 
 # Update for new values
-base = '/gpfs/alpine/cli137/proj-shared/6ru/costa_rica/costa_rica_biweekly/costa_rica_biweekly_62'
-file_head = "/costa_rica_biweekly_62_timeseries.split.12"
+base = '/gpfs/alpine/cli137/proj-shared/6ru/costa_rica/costa_rica_biweekly/costa_rica_biweekly_10'
+file_head = "/costa_rica_biweekly_10_timeseries.split.12"
 
 save_path = "/gpfs/alpine/cli137/proj-shared/6ru/plots/" + file_head + '/'
 if os.path.isdir(save_path) == False:
@@ -793,5 +793,5 @@ df_attr_summary.plot(ax = axs, kind = 'bar', width = .7)
 axs.grid()
 axs.set_ylabel ("Count of Attr Code", fontsize =14)
 axs.set_xlabel ("Attr Codes", fontsize =14)
-plt.title(file_head)
+plt.title(file_head+'attr_smooth_ano_1025')
 fig.savefig(save_path + "Attribution_bar.png")
