@@ -254,12 +254,12 @@ def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
             code_px = 90+ lag
             ts_codes_px[8] = code_px
 
-        if (10 in ts_codes_px) and (20 in ts_codes_px):
+        if (10+ lag in ts_codes_px) and (20+ lag in ts_codes_px):
             # neg NDRE ext driven by dry and dry : 100 + lag
             code_px = 100+ lag
             ts_codes_px[9] = code_px
 
-        if (80 in ts_codes_px) and (90 in ts_codes_px):
+        if (80+ lag in ts_codes_px) and (90+ lag in ts_codes_px):
             # pos NDRE ext driven by wet and cold : 110 + lag
             code_px = 110 + lag
             ts_codes_px[10] = code_px
