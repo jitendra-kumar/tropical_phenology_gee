@@ -311,6 +311,7 @@ for lag in range(6):
         filename_iav = path_attr + f"iav_ndre_ano_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
         np.savetxt(filename_iav,
                iav_ndre,
+               fmt='%10.4f',
                delimiter = " ")
 
         if save_ext_loc in ['y','yes','YES','Y']:
