@@ -196,6 +196,8 @@ def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
         loc_10q = np.zeros((75-int(lag)))
         loc_90q = np.zeros((75-int(lag)))
     else:
+        # Interannual Variability = standard deviation of anomalies
+        iav_px = np.array(ts_ndre_ano_non_mask_vals).std()
         # Mean value of NDRE anomalies of 10th quarlite
         loc_10q = ts_ndre_ano<np.percentile(ts_ndre_ano_non_mask_vals,10)
         px_ndre_10q = ts_ndre_ano[loc_10q].mean()
@@ -264,7 +266,7 @@ def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
             code_px = 110 + lag
             ts_codes_px[10] = code_px
 
-    return ts_codes_px, loc_10q, loc_90q
+    return ts_codes_px, loc_10q, loc_90q,iav_px
 
 
 # After this every rank will do a part of the calculations
@@ -284,11 +286,12 @@ for lag in range(6):
     attr_ar = np.zeros((px_per_rank, len(Codes)))
     ar_loc_neg = np.zeros((px_per_rank,75- int(lag)))
     ar_loc_pos = np.zeros((px_per_rank,75- int(lag)))
+    iav_ndre   = np.zeros((px_per_rank,1))
     for i in range(px_per_rank):
         ts_ndre_ano = data_NDRE_anomalies[rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
         ts_pr_ano   = data_PR_anomalies  [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
         ts_tas_ano  = data_TAS_anomalies[rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
-        attr_ar[i],ar_loc_neg[i],ar_loc_pos[i] = Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano, lag=lag)
+        attr_ar[i],ar_loc_neg[i],ar_loc_pos[i], iav_ndre[i] = Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano, lag=lag)
 
         # Saving attribution data
         # -----------------------
@@ -300,18 +303,24 @@ for lag in range(6):
         np.savetxt(filename_attr,
                attr_ar,
                fmt='%i',
-               delimiter = ",")
+               delimiter = " ")
+        #IAV
+        filename_iav = path_attr + f"iav_ndre_ano_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
+        np.savetxt(filename_iav,
+               iav_ndre,
+               delimiter = " ")
+
         if save_ext_loc in ['y','yes','YES','Y']:
             filename_neg_loc = path_attr + f"neg_loc_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
             np.savetxt(filename_neg_loc,
                    ar_loc_neg,
                    fmt='%i',
-                   delimiter = ",")
+                   delimiter = " ")
             filename_pos_loc = path_attr + f"pos_loc_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
             np.savetxt(filename_pos_loc,
                    ar_loc_pos,
                    fmt='%i',
-                   delimiter = ",")
+                   delimiter = " ")
 
         
 print ("Success : ", rank )
