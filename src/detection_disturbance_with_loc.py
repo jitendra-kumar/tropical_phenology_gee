@@ -21,6 +21,7 @@ parser.add_argument('--filename_Precip' ,'-f_pr'      , help = "Filepath/filenam
 parser.add_argument('--filename_Temp'   ,'-f_tas'     , help = "Filepath/filename of temperature" , type= str,    default= None       )
 parser.add_argument('--save_ext_loc'    ,'-save_loc'  , help = "Do you want to save loc of ext? (y,n)", type= str,    default= 'n'    )
 parser.add_argument('--attribution_type','-attr_typ'  , help = "Attribute using driver ano or ori ts?", type= str,    default= 'ano'  )
+parser.add_argument('--save_ano_file'  ,'-save_f_ano', help = "Do you want to save anomaly file?", type= str,    default= 'y'  )
 args = parser.parse_args()
 
 # The inputs:
@@ -30,6 +31,7 @@ file_PR    = str   (args.filename_Precip)
 file_TAS   = str   (args.filename_Temp)
 save_ext_loc = str   (args.save_ext_loc)
 attr_type = str   (args.attribution_type)
+save_ano_file = str   (args.save_ano_file)
 
 # Running the file
 #New Version : `detection_disturbance_with_loc.py`
@@ -39,7 +41,8 @@ attr_type = str   (args.attribution_type)
 #        -f_ndre /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.smooth \
 #        -f_pr /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.precip \
 #        -f_tas /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.temp \
-#        -save_loc no
+#        -save_loc no \
+#        -save_f_ano yes
 
 
 
@@ -93,7 +96,7 @@ elif attr_type == "ori":
     data_TAS_anomalies  = data_temp [:,:75]
 
 
-if (rank == 0) and (attr_type == "ano") :
+if (rank == 0) and (attr_type == "ano") and (save_ano_file in ['y','yes']):
     # Saving anomalies
     # ================
     filename_ano_ndre =  '.'.join(file_NDRE.split('.')[:-1]) + '_ano.' +file_NDRE.split('.')[-1]
