@@ -24,8 +24,13 @@ time mpiexec -n 30 python detection_disturbance.py \
 New Version : `detection_disturbance_with_loc.py`
   * Saves locations of extremes if required , `-save_loc y` or `-save_loc yes`
   * will gerenetate different directory for smooth and interp files
+
+```
 time srun -n 30 python /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/Detection_Attribution/detection_disturbance_with_loc.py \
         -f_ndre /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.smooth \
         -f_pr /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.precip \
         -f_tas /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.temp \
-        -save_loc no
+        -attr_typ ano \
+        -save_loc yes \
+        -save_f_ano no  
+```
