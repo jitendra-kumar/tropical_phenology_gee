@@ -198,6 +198,7 @@ def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
         # Printing zeros for location of extremes
         loc_10q = np.zeros((75-int(lag)))
         loc_90q = np.zeros((75-int(lag)))
+        iav_px  = 0
     else:
         # Interannual Variability = standard deviation of anomalies
         iav_px = np.array(ts_ndre_ano_non_mask_vals).std()
