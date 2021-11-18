@@ -45,8 +45,8 @@ save_ano_file = str   (args.save_ano_file)
 #New Version : `detection_disturbance_with_loc.py`
 #  * Saves locations of extremes if required , `-save_loc y` or `-save_loc yes`
 #  * will gerenetate different directory for smooth and interp files
-#time srun -n 32 python /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/Detection_Attribution/detection_disturbance_with_loc.py \
-#        -f_ndre /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.smooth \
+#time srun -n 32 python /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/Detection_Attribution/detection_disturbance_with_loc_5vars.py \
+#        -f_ndre /mnt/locutus/remotesensing/tropics/data/s2_data_raw/costa_rica_ascii/costa_rica_biweekly_1/costa_rica_biweekly_1_timeseries.split.11.smooth \
 #        -f_tp /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.tp \
 #        -f_t2m /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.t2m \
 #        -f_swvl /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.swvl \
