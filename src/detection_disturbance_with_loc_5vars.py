@@ -22,7 +22,8 @@ parser.add_argument('--filename_temp'       ,'-f_t2m'   , help = "Filepath/filen
 parser.add_argument('--filename_soilMoist'  ,'-f_swvl'  , help = "Filepath/filename of soil moisture"   , type= str,    default= None       )
 parser.add_argument('--filename_shortRad'   ,'-f_ssrd'  , help = "Filepath/filename of short radiation" , type= str,    default= None       )
 parser.add_argument('--filename_AET'        ,'-f_aet'   , help = "Filepath/filename of evap-trans"      , type= str,    default= None       )
-parser.add_argument('--save_ext_loc'        ,'-save_loc'  , help = "Do you want to save loc of ext? (y,n)", type= str,    default= 'n'    )
+parser.add_argument('--filepath_out'        ,'-f_pathout' , help = "Filepath of output files"           , type= str,    default= None       )
+parser.add_argument('--save_ext_loc'        ,'-save_loc'  , help = "Do you want to save loc of ext? (y,n)", type= str,    default= 'y'    )
 parser.add_argument('--attribution_type'    ,'-attr_typ'  , help = "Attribute using driver ano or ori ts?", type= str,    default= 'ano'  )
 parser.add_argument('--save_ano_file'       ,'-save_f_ano', help = "Do you want to save anomaly file?", type= str,    default= 'y'  )
 args = parser.parse_args()
@@ -35,6 +36,7 @@ file_t2m   = str   (args.filename_temp)
 file_swvl    = str   (args.filename_soilMoist)
 file_ssrd    = str   (args.filename_shortRad)
 file_aet    = str   (args.filename_AET)
+fpath_out  = str   (args.filepath_out)
 save_ext_loc = str   (args.save_ext_loc)
 attr_type = str   (args.attribution_type)
 save_ano_file = str   (args.save_ano_file)
@@ -45,9 +47,13 @@ save_ano_file = str   (args.save_ano_file)
 #  * will gerenetate different directory for smooth and interp files
 #time srun -n 32 python /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/Detection_Attribution/detection_disturbance_with_loc.py \
 #        -f_ndre /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.smooth \
-#        -f_pr /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.precip \
-#        -f_tas /gpfs/alpine/cli137/proj-shared/6ru/proj_analysis/am_0.temp \
-#        -save_loc no \
+#        -f_tp /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.tp \
+#        -f_t2m /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.t2m \
+#        -f_swvl /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.swvl \
+#        -f_ssrd /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.ssrd \
+#        -f_aet /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.aet \
+#        -f_pathout /mnt/locutus/remotesensing/tropics/costa_rica/attr_codes/ \
+#        -save_loc y \
 #        -save_f_ano yes
 
 
@@ -167,49 +173,82 @@ if (rank == 0) and (attr_type == "ori") :
 # Attribution
 # ===========
 
+codes_description = """NDRE Extreme type (neg/pos at 1000's) + Driver code (100's) + Driver anomaly (neg/pos at 10's) + lag (0to9 at 1's) ...
+                    Driver code: tp (1), t2m(2), swvl (3), ssrd (4), and aet(5)
+                    Driver anomaly type (neg/pos) i.e. 10/20
+                    NDRE Extreme type: neg/pos i.e. 1000/2000
+
+                    e.g. neg ndre extreme driven by neg temp anomaly at lag 1 : 1000+200+10+1 = 1211 code
+                    e.g. pos ndre extreme driven by neg aet anomaly at lag 1  : 2000+500+10+1 = 2511 code
+                    """
+
+
+
+
 Codes = {
-    999 : "too few values",
-    110 : "neg NDRE ext driven by dry",
-    120 : "neg NDRE ext driven by hot",
-    130 : "neg NDRE ext driven by wet",
-    140 : "neg NDRE ext driven by cold",
-    
-    60 : "pos NDRE ext driven by dry",
-    70 : "pos NDRE ext driven by hot",
-    80 : "pos NDRE ext driven by wet",
-    90 : "pos NDRE ext driven by cold",
-    100: "neg NDRE ext driven by dry and dry",
-    110: "pos NDRE ext driven by wet and cold",
-    
+    9999 : "too few values",
+    1110 : "neg NDRE ext driven by neg tp anomaly ",
+    1120 : "neg NDRE ext driven by pos tp anomaly ",
+    1210 : "neg NDRE ext driven by neg t2m anomaly ",
+    1220 : "neg NDRE ext driven by pos t2m anomaly ",
+    1310 : "neg NDRE ext driven by neg swvl anomaly ",
+    1320 : "neg NDRE ext driven by pos swvl anomaly ",
+    1410 : "neg NDRE ext driven by neg ssrd anomaly ",
+    1420 : "neg NDRE ext driven by pos ssrd anomaly ",
+    1510 : "neg NDRE ext driven by neg aet anomaly ",
+    1520 : "neg NDRE ext driven by pos aet anomaly ",
+    2110 : "pos NDRE ext driven by neg tp anomaly ",
+    2120 : "pos NDRE ext driven by pos tp anomaly ",
+    2210 : "pos NDRE ext driven by neg t2m anomaly ",
+    2220 : "pos NDRE ext driven by pos t2m anomaly ",
+    2310 : "pos NDRE ext driven by neg swvl anomaly ",
+    2320 : "pos NDRE ext driven by pos swvl anomaly ",
+    2410 : "pos NDRE ext driven by neg ssrd anomaly ",
+    2420 : "pos NDRE ext driven by pos ssrd anomaly ",
+    2510 : "pos NDRE ext driven by neg aet anomaly ",
+    2520 : "pos NDRE ext driven by pos aet anomaly ",
 }
 
 
 
-def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
+def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_tp_ano, ts_t2m_ano, ts_swvl_ano, ts_ssrd_ano, ts_aet_ano, lag=0):
     """
     Similar to Attribution_Drivers_Codes, but here we compare the driver during 10p of NDRE with 25q of its own value and remove all grids with negative values
     
     Checks the climatic conditions during negative and postive NDRE extremes at a pixel.
     Assigns codes of attributions.
      
-     999     : 'too few values',
-     10 + lag: 'neg NDRE ext driven by dry',
-     20 + lag: 'neg NDRE ext driven by hot',
-     30 + lag: 'neg NDRE ext driven by wet',
-     40 + lag: 'neg NDRE ext driven by cold',
-     60 + lag: 'pos NDRE ext driven by dry',
-     70 + lag: 'pos NDRE ext driven by hot',
-     80 + lag: 'pos NDRE ext driven by wet',
-     90 + lag: 'pos NDRE ext driven by cold',
-     100+ lag: 'neg NDRE ext driven by dry and dry',
-     110+ lag: 'pos NDRE ext driven by wet and cold'
-     
+     9999     : "too few values",
+     1110 + lag: "neg NDRE ext driven by neg tp anomaly ",
+     1120 + lag: "neg NDRE ext driven by pos tp anomaly ",
+     1210 + lag: "neg NDRE ext driven by neg t2m anomaly ",
+     1220 + lag: "neg NDRE ext driven by pos t2m anomaly ",
+     1310 + lag: "neg NDRE ext driven by neg swvl anomaly ",
+     1320 + lag: "neg NDRE ext driven by pos swvl anomaly ",
+     1410 + lag: "neg NDRE ext driven by neg ssrd anomaly ",
+     1420 + lag: "neg NDRE ext driven by pos ssrd anomaly ",
+     1510 + lag: "neg NDRE ext driven by neg aet anomaly ",
+     1520 + lag: "neg NDRE ext driven by pos aet anomaly ",
+     2110 + lag: "pos NDRE ext driven by neg tp anomaly ",
+     2120 + lag: "pos NDRE ext driven by pos tp anomaly ",
+     2210 + lag: "pos NDRE ext driven by neg t2m anomaly ",
+     2220 + lag: "pos NDRE ext driven by pos t2m anomaly ",
+     2310 + lag: "pos NDRE ext driven by neg swvl anomaly ",
+     2320 + lag: "pos NDRE ext driven by pos swvl anomaly ",
+     2410 + lag: "pos NDRE ext driven by neg ssrd anomaly ",
+     2420 + lag: "pos NDRE ext driven by pos ssrd anomaly ",
+     2510 + lag: "pos NDRE ext driven by neg aet anomaly ",
+     2520 + lag: "pos NDRE ext driven by pos aet anomaly ",
+
      
     Parameters
     ----------
     ts_ndre_ano : ts of a pixel of NDRE
-    ts_pr_ano : ts of a pixel of NDRE
-    ts_tas_ano : ts of a pixel of NDRE
+    ts_tp_ano : ts of a pixel of tp
+    ts_t2m_ano : ts of a pixel of t2m
+    ts_swvl_ano : ts of a pixel of swvl
+    ts_ssrd_ano :ts of a pixel of ssrd
+    ts_aet_ano : ts of a pixel of aet
     lag: lag timestep, default =0
     
     Returns
@@ -218,16 +257,19 @@ def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
     """
     # To include the effect of lag
     if lag > 0 :
-        ts_ndre_ano = ts_ndre_ano[lag:]
-        ts_pr_ano   = ts_pr_ano  [:-lag]
-        ts_tas_ano  = ts_tas_ano [:-lag]
+        ts_ndre_ano     = ts_ndre_ano[lag:]
+        ts_tp_ano       = ts_tp_ano  [:-lag]
+        ts_t2m_ano      = ts_t2m_ano [:-lag]
+        ts_swvl_ano     = ts_swvl_ano  [:-lag]
+        ts_ssrd_ano     = ts_ssrd_ano  [:-lag]
+        ts_aet_ano      = ts_aet_ano  [:-lag]
 
     # initializing the codes array per pixel with zeros and will fill as conditions are met
     ts_codes_px = np.zeros((len(Codes)))
 
     ts_ndre_ano_non_mask_vals = ts_ndre_ano[~ts_ndre_ano.mask]
     if ts_ndre_ano_non_mask_vals.size < 75-int(lag) : 
-        code_px = 999
+        code_px = 9999
         ts_codes_px[0] = code_px
         # Printing zeros for location of extremes
         loc_10q = np.zeros((75-int(lag)))
@@ -244,65 +286,143 @@ def Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano,lag=0):
         px_ndre_90q = ts_ndre_ano[loc_90q].mean()
 
         # Mean precipiration and temperature during < 10q NDRE
-        pr_du_neg  = ts_pr_ano[loc_10q].mean()
-        tas_du_neg = ts_tas_ano[loc_10q].mean()
+        tp_du_neg   = ts_tp_ano  [loc_10q].mean()
+        t2m_du_neg  = ts_t2m_ano [loc_10q].mean()
+        swvl_du_neg = ts_swvl_ano[loc_10q].mean()
+        ssrd_du_neg = ts_ssrd_ano[loc_10q].mean()
+        aet_du_neg  = ts_aet_ano [loc_10q].mean()
+
         # Mean precipiration and temperature during > 90q NDRE
-        pr_du_pos  = ts_pr_ano[loc_90q].mean()
-        tas_du_pos = ts_tas_ano[loc_90q].mean()
+        tp_du_pos   = ts_tp_ano  [loc_90q].mean()
+        t2m_du_pos  = ts_t2m_ano [loc_90q].mean()
+        swvl_du_pos = ts_swvl_ano[loc_90q].mean()
+        ssrd_du_pos = ts_ssrd_ano[loc_90q].mean()
+        aet_du_pos  = ts_aet_ano [loc_90q].mean()
 
         # 25q of precipitation
-        pr_25q = np.percentile(ts_pr_ano,25)
+        tp_25q = np.percentile(ts_tp_ano,25)
         # 75q of precipitation
-        pr_75q = np.percentile(ts_pr_ano,75)
+        tp_75q = np.percentile(ts_tp_ano,75)
 
         # 25q of tas
-        tas_25q = np.percentile(ts_tas_ano,25)
+        t2m_25q = np.percentile(t2m_du_neg,25)
         # 75q of tas
-        tas_75q = np.percentile(ts_tas_ano,75)
+        t2m_75q = np.percentile(t2m_du_neg,75)
 
-        if pr_du_neg < pr_25q :
-            # neg NDRE ext driven by dry : 10+ lag
-            code_px = 10+ lag
+        # 25q of swvl
+        swvl_25q = np.percentile(ts_swvl_ano,25)
+        # 75q of swvl
+        swvl_75q = np.percentile(ts_swvl_ano,75)
+
+        # 25q of ssrd
+        ssrd_25q = np.percentile(ts_ssrd_ano,25)
+        # 75q of ssrd
+        ssrd_75q = np.percentile(ts_ssrd_ano,75)
+
+        # 25q of aet
+        aet_25q = np.percentile(ts_aet_ano,25)
+        # 75q of aet
+        aet_75q = np.percentile(ts_aet_ano,75)
+
+        # 1110 + lag: "neg NDRE ext driven by neg tp anomaly "
+        if tp_du_neg < tp_25q :
+            code_px = 1110+ lag
             ts_codes_px[1] = code_px
-        if tas_du_neg > tas_75q :
-            # neg NDRE ext driven by hot : 20+ lag
-            code_px = 20+ lag
+        
+        # 1120 + lag: "neg NDRE ext driven by pos tp anomaly ",
+        if tp_du_neg > tp_75q :
+            code_px = 1120+ lag
             ts_codes_px[2] = code_px
-        if pr_du_neg > pr_75q :
-            # neg NDRE ext driven by wet : 30+ lag
-            code_px = 30+ lag
+
+        # 1210 + lag: "neg NDRE ext driven by neg t2m anomaly ",
+        if t2m_du_neg < t2m_25q :
+            code_px = 1210+ lag
             ts_codes_px[3] = code_px
-        if tas_du_neg < tas_25q :
-            # neg NDRE ext driven by cold : 40+ lag
-            code_px = 40+ lag
+        
+        # 1220 + lag: "neg NDRE ext driven by pos t2m anomaly ",
+        if t2m_du_neg > t2m_75q :
+            code_px = 1220+ lag
             ts_codes_px[4] = code_px
 
-        if pr_du_pos < pr_25q :
-            # pos NDRE ext driven by dry : 60+ lag
-            code_px = 60+ lag
+        # 1310 + lag: "neg NDRE ext driven by neg swvl anomaly ",
+        if swvl_du_neg < swvl_25q :
+            code_px = 1310+ lag
             ts_codes_px[5] = code_px
-        if tas_du_pos > tas_75q :
-            # pos NDRE ext driven by hot : 70+ lag
-            code_px = 70+ lag
+        
+        # 1320 + lag: "neg NDRE ext driven by pos swvl anomaly ",
+        if swvl_du_neg > swvl_75q :
+            code_px = 1320+ lag
             ts_codes_px[6] = code_px
-        if pr_du_pos > pr_75q :
-            # pos NDRE ext driven by wet : 80+ lag
-            code_px = 80+ lag
+
+        # 1410 + lag: "neg NDRE ext driven by neg ssrd anomaly ",
+        if ssrd_du_neg < ssrd_25q :
+            code_px = 1410+ lag
             ts_codes_px[7] = code_px
-        if tas_du_pos < tas_25q :
-            # pos NDRE ext driven by cold : 90+ lag
-            code_px = 90+ lag
+        
+        # 1420 + lag: "neg NDRE ext driven by pos ssrd anomaly ",
+        if ssrd_du_neg > ssrd_75q :
+            code_px = 1420+ lag
             ts_codes_px[8] = code_px
 
-        if (10+ lag in ts_codes_px) and (20+ lag in ts_codes_px):
-            # neg NDRE ext driven by dry and dry : 100 + lag
-            code_px = 100+ lag
+        # 1510 + lag: "neg NDRE ext driven by neg aet anomaly ",
+        if aet_du_neg < aet_25q :
+            code_px = 1510+ lag
             ts_codes_px[9] = code_px
-
-        if (80+ lag in ts_codes_px) and (90+ lag in ts_codes_px):
-            # pos NDRE ext driven by wet and cold : 110 + lag
-            code_px = 110 + lag
+        
+        # 1520 + lag: "neg NDRE ext driven by pos aet anomaly ",
+        if aet_du_neg > aet_75q :
+            code_px = 1520+ lag
             ts_codes_px[10] = code_px
+        
+        # 2110 + lag: "pos NDRE ext driven by neg tp anomaly "
+        if tp_du_pos < tp_25q :
+            code_px = 2110+ lag
+            ts_codes_px[11] = code_px
+        
+        # 2120 + lag: "pos NDRE ext driven by pos tp anomaly ",
+        if tp_du_pos > tp_75q :
+            code_px = 2120+ lag
+            ts_codes_px[12] = code_px
+        
+        # 2210 + lag: "pos NDRE ext driven by neg t2m anomaly ",
+        if t2m_du_pos < t2m_25q :
+            code_px = 2210+ lag
+            ts_codes_px[13] = code_px
+        
+        # 2220 + lag: "pos NDRE ext driven by pos t2m anomaly ",
+        if t2m_du_pos > t2m_75q :
+            code_px = 2220+ lag
+            ts_codes_px[14] = code_px
+
+        # 2310 + lag: "pos NDRE ext driven by neg swvl anomaly ",
+        if swvl_du_pos < swvl_25q :
+            code_px = 2310+ lag
+            ts_codes_px[15] = code_px
+        
+        # 2320 + lag: "pos NDRE ext driven by pos swvl anomaly ",
+        if swvl_du_pos > swvl_75q :
+            code_px = 2320+ lag
+            ts_codes_px[16] = code_px
+
+        # 2410 + lag: "pos NDRE ext driven by neg ssrd anomaly ",
+        if ssrd_du_pos < ssrd_25q :
+            code_px = 2410+ lag
+            ts_codes_px[17] = code_px
+        
+        # 2420 + lag: "pos NDRE ext driven by pos ssrd anomaly ",
+        if ssrd_du_pos > ssrd_75q :
+            code_px = 2420+ lag
+            ts_codes_px[18] = code_px
+
+        # 2510 + lag: "pos NDRE ext driven by neg aet anomaly ",
+        if aet_du_pos < aet_25q :
+            code_px = 2510+ lag
+            ts_codes_px[19] = code_px
+        
+        # 2520 + lag: "pos NDRE ext driven by pos aet anomaly ",
+        if aet_du_pos > aet_75q :
+            code_px = 2520+ lag
+            ts_codes_px[20] = code_px
 
     return ts_codes_px, loc_10q, loc_90q,iav_px
 
@@ -326,14 +446,25 @@ for lag in range(6):
     ar_loc_pos = np.zeros((px_per_rank,75- int(lag)))
     iav_ndre   = np.zeros((px_per_rank,1))
     for i in range(px_per_rank):
-        ts_ndre_ano = data_NDRE_anomalies[rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
-        ts_pr_ano   = data_PR_anomalies  [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
-        ts_tas_ano  = data_TAS_anomalies[rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
-        attr_ar[i],ar_loc_neg[i],ar_loc_pos[i], iav_ndre[i] = Attribution_Drivers_Codes_1025 (ts_ndre_ano, ts_pr_ano, ts_tas_ano, lag=lag)
+        ts_ndre_ano = data_NDRE_anomalies  [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
+        ts_tp_ano   = data_tp_anomalies    [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
+        t2m_du_neg  = data_t2m_anomalies   [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
+        ts_swvl_ano = data_swvl_anomalies  [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
+        ts_ssrd_ano = data_ssrd_anomalies  [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
+        ts_aet_ano  = data_aet_anomalies   [rank*int(data_NDRE_anomalies.shape[0]/load_divisor)+i,:]
+
+        attr_ar[i],ar_loc_neg[i],ar_loc_pos[i], iav_ndre[i] = Attribution_Drivers_Codes_1025 (ts_ndre_ano, 
+                                                                ts_tp_ano, 
+                                                                t2m_du_neg, 
+                                                                ts_swvl_ano,
+                                                                ts_ssrd_ano,
+                                                                ts_aet_ano,
+                                                                lag=lag)
 
         # Saving attribution data
         # -----------------------
-        path_attr = ("/").join(file_NDRE.split('/')[:-1]) + '/' +  ("_").join((file_NDRE.split('/')[-1]).split("."))+'/'
+        #path_attr = ("/").join(file_NDRE.split('/')[:-1]) + '/' +  ("_").join((file_NDRE.split('/')[-1]).split("."))+'/'
+        path_attr = fpath_out
         if os.path.isdir(path_attr) == False:
             os.makedirs(path_attr)
         # Attr
