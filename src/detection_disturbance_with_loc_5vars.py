@@ -22,7 +22,7 @@ parser.add_argument('--filename_temp'       ,'-f_t2m'   , help = "Filepath/filen
 parser.add_argument('--filename_soilMoist'  ,'-f_swvl'  , help = "Filepath/filename of soil moisture"   , type= str,    default= None       )
 parser.add_argument('--filename_shortRad'   ,'-f_ssrd'  , help = "Filepath/filename of short radiation" , type= str,    default= None       )
 parser.add_argument('--filename_AET'        ,'-f_aet'   , help = "Filepath/filename of evap-trans"      , type= str,    default= None       )
-parser.add_argument('--filepath_out'        ,'-f_pathout' , help = "Filepath of output files"           , type= str,    default= None       )
+parser.add_argument('--filepath_out'        ,'-f_pathout' , help = "Filepath of output attr files in tile split combination"           , type= str,    default= None       )
 parser.add_argument('--save_ext_loc'        ,'-save_loc'  , help = "Do you want to save loc of ext? (y,n)", type= str,    default= 'y'    )
 parser.add_argument('--attribution_type'    ,'-attr_typ'  , help = "Attribute using driver ano or ori ts?", type= str,    default= 'ano'  )
 parser.add_argument('--save_ano_file'       ,'-save_f_ano', help = "Do you want to save anomaly file?", type= str,    default= 'y'  )
@@ -52,7 +52,7 @@ save_ano_file = str   (args.save_ano_file)
 #        -f_swvl /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.swvl \
 #        -f_ssrd /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.ssrd \
 #        -f_aet /mnt/locutus/remotesensing/tropics/costa_rica/costa_rica_era5_vars/costa_rica_biweekly_1_timeseries.split.11.aet \
-#        -f_pathout /mnt/locutus/remotesensing/tropics/costa_rica/attr_codes/ \
+#        -f_pathout /mnt/locutus/remotesensing/tropics/costa_rica/attr_codes_t_001_s_011/ \
 #        -save_loc y \
 #        -save_f_ano yes
 
