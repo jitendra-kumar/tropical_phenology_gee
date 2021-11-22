@@ -41,6 +41,12 @@ save_ext_loc = str   (args.save_ext_loc)
 attr_type = str   (args.attribution_type)
 save_ano_file = str   (args.save_ano_file)
 
+
+if os.path.isdir(fpath_out) == False:
+            os.makedirs(fpath_out)
+if os.path.isdir(fpath_out+'anomalies/') == False:
+            os.makedirs(fpath_out+'anomalies/')
+
 # Running the file
 #New Version : `detection_disturbance_with_loc.py`
 #  * Saves locations of extremes if required , `-save_loc y` or `-save_loc yes`
@@ -120,41 +126,41 @@ elif attr_type == "ori":
 if (rank == 0) and (attr_type == "ano") and (save_ano_file in ['y','yes']):
     # Saving anomalies
     # ================
-    filename_ano_ndre =  '.'.join(file_NDRE.split('.')[:-1]) + '_ano.' +file_NDRE.split('.')[-1]
-    filename_ano_tp   =  '.'.join(file_tp.split('.')[:-1]) + '_ano.' +file_tp.split('.')[-1]
-    filename_ano_t2m   =  '.'.join(file_t2m.split('.')[:-1]) + '_ano.' +file_t2m.split('.')[-1]
-    filename_ano_swvl   =  '.'.join(file_swvl.split('.')[:-1]) + '_ano.' +file_swvl.split('.')[-1]
-    filename_ano_ssrd   =  '.'.join(file_ssrd.split('.')[:-1]) + '_ano.' +file_ssrd.split('.')[-1]
-    filename_ano_aet   =  '.'.join(file_aet.split('.')[:-1]) + '_ano.' +file_aet.split('.')[-1]
+    filename_ano_ndre =  '.'.join(file_NDRE.split('/')[-1].split('.')[:-1]) + '_ano.' +file_NDRE.split('/')[-1].split('.')[-1]
+    filename_ano_tp   =  '.'.join(file_tp.split('/')[-1].split('.')[:-1]) + '_ano.' +file_tp.split('/')[-1].split('.')[-1]
+    filename_ano_t2m   =  '.'.join(file_t2m.split('/')[-1].split('.')[:-1]) + '_ano.' +file_t2m.split('/')[-1].split('.')[-1]
+    filename_ano_swvl   =  '.'.join(file_swvl.split('/')[-1].split('.')[:-1]) + '_ano.' +file_swvl.split('/')[-1].split('.')[-1]
+    filename_ano_ssrd   =  '.'.join(file_ssrd.split('/')[-1].split('.')[:-1]) + '_ano.' +file_ssrd.split('/')[-1].split('.')[-1]
+    filename_ano_aet   =  '.'.join(file_aet.split('/')[-1].split('.')[:-1]) + '_ano.' +file_aet.split('/')[-1].split('.')[-1]
 
 
     # NDRE
-    np.savetxt(filename_ano_ndre,
+    np.savetxt(fpath_out+'anomalies/' + filename_ano_ndre,
            data_NDRE_anomalies,
            fmt='%10.4f',
            delimiter = ",")
     # Pr
-    np.savetxt(filename_ano_tp,
+    np.savetxt(fpath_out+'anomalies/' + filename_ano_tp,
            data_tp_anomalies,
            fmt='%10.4f',
            delimiter = ",")
     # Tas
-    np.savetxt(filename_ano_t2m,
+    np.savetxt(fpath_out+'anomalies/' + filename_ano_t2m,
            data_t2m_anomalies,
            fmt='%10.4f',  
            delimiter = ",")
     # swvl
-    np.savetxt(filename_ano_swvl,
+    np.savetxt(fpath_out+'anomalies/' + filename_ano_swvl,
            data_swvl_anomalies,
            fmt='%10.4f',
            delimiter = ",")
     # ssrd
-    np.savetxt(filename_ano_ssrd,
+    np.savetxt(fpath_out +'anomalies/'+ filename_ano_ssrd,
            data_ssrd_anomalies,
            fmt='%10.4f',
            delimiter = ",")
     # aet
-    np.savetxt(filename_ano_aet,
+    np.savetxt(fpath_out +'anomalies/'+ filename_ano_aet,
            data_aet_anomalies,
            fmt='%10.4f',
            delimiter = ",")
@@ -162,9 +168,9 @@ if (rank == 0) and (attr_type == "ano") and (save_ano_file in ['y','yes']):
 if (rank == 0) and (attr_type == "ori") :
     # Saving anomalies
     # ================
-    filename_ano_ndre =  '.'.join(file_NDRE.split('.')[:-1]) + '_ano.' +file_NDRE.split('.')[-1]
+    filename_ano_ndre =  '.'.join(file_NDRE.split('/')[-1].split('.')[:-1]) + '_ano.' +file_NDRE.split('/')[-1].split('.')[-1]
     # NDRE
-    np.savetxt(filename_ano_ndre,
+    np.savetxt(fpath_out+'anomalies/' + filename_ano_ndre,
            data_NDRE_anomalies,
            fmt='%10.4f',
            delimiter = ",")
