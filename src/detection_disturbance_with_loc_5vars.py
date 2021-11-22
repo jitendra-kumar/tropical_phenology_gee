@@ -473,26 +473,28 @@ for lag in range(6):
         path_attr = fpath_out
         if os.path.isdir(path_attr) == False:
             os.makedirs(path_attr)
+        if os.path.isdir(path_attr+'attribution/') == False:
+            os.makedirs(path_attr+'attribution/')
         # Attr
-        filename_attr = path_attr + f"attr_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
+        filename_attr = path_attr+'attribution/' + f"attr_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
         np.savetxt(filename_attr,
                attr_ar,
                fmt='%i',
                delimiter = " ")
         #IAV
-        filename_iav = path_attr + f"iav_ndre_ano_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
+        filename_iav = path_attr+'attribution/' + f"iav_ndre_ano_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
         np.savetxt(filename_iav,
                iav_ndre,
                fmt='%10.4f',
                delimiter = " ")
 
         if save_ext_loc in ['y','yes','YES','Y']:
-            filename_neg_loc = path_attr + f"neg_loc_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
+            filename_neg_loc = path_attr+'attribution/' + f"neg_loc_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
             np.savetxt(filename_neg_loc,
                    ar_loc_neg,
                    fmt='%i',
                    delimiter = " ")
-            filename_pos_loc = path_attr + f"pos_loc_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
+            filename_pos_loc = path_attr +'attribution/'+ f"pos_loc_{attr_type}_lag_{str(lag).zfill(2)}_rank_{str(rank).zfill(3)}.csv"
             np.savetxt(filename_pos_loc,
                    ar_loc_pos,
                    fmt='%i',
