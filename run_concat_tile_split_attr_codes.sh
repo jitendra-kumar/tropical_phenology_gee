@@ -26,9 +26,9 @@ do
 done
 
 #Concatenating all tile split files to one file per lag
-cat ${out_path_tile_split}"/"*_attr_ano_lag_00.csv > ${out_path_main}"/All"${region}"_attr_ano_lag_00.csv"
-cat ${out_path_tile_split}"/"*_attr_ano_lag_01.csv > ${out_path_main}"/All"${region}"_attr_ano_lag_01.csv"
-cat ${out_path_tile_split}"/"*_attr_ano_lag_02.csv > ${out_path_main}"/All"${region}"_attr_ano_lag_02.csv"
-cat ${out_path_tile_split}"/"*_attr_ano_lag_03.csv > ${out_path_main}"/All"${region}"_attr_ano_lag_03.csv"
-cat ${out_path_tile_split}"/"*_attr_ano_lag_04.csv > ${out_path_main}"/All"${region}"_attr_ano_lag_04.csv"
-cat ${out_path_tile_split}"/"*_attr_ano_lag_05.csv > ${out_path_main}"/All"${region}"_attr_ano_lag_05.csv"
+cat ${out_path_tile_split}"/"*_attr_ano_lag_00.csv > ${out_path_main}"/All_"${region}"_attr_ano_lag_00.csv"
+cat ${out_path_tile_split}"/"*_attr_ano_lag_01.csv > ${out_path_main}"/All_"${region}"_attr_ano_lag_01.csv"
+cat ${out_path_tile_split}"/"*_attr_ano_lag_02.csv > ${out_path_main}"/All_"${region}"_attr_ano_lag_02.csv"
+cat ${out_path_tile_split}"/"*_attr_ano_lag_03.csv > ${out_path_main}"/All_"${region}"_attr_ano_lag_03.csv"
+cat ${out_path_tile_split}"/"*_attr_ano_lag_04.csv > ${out_path_main}"/All_"${region}"_attr_ano_lag_04.csv"
+cat ${out_path_tile_split}"/"*_attr_ano_lag_05.csv > ${out_path_main}"/All_"${region}"_attr_ano_lag_05.csv"
