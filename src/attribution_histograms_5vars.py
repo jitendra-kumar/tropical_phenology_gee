@@ -14,7 +14,9 @@ import os
 #  Enter the region of interest
 region = "puerto_rico"
 
-path_attr = f"/gpfs/alpine/cli137/proj-shared/ud4/{region}_attr_summary/"
+#path_attr = f"/gpfs/alpine/cli137/proj-shared/ud4/{region}_attr_summary/"
+# Theseus:
+path_attr = f"/mnt/locutus/remotesensing/tropics/anomalies_detection/{region}_attr_summary/"
 
 #save_path = "/gpfs/alpine/cli137/proj-shared/ud4/costa_rica/"
 save_path=path_attr
