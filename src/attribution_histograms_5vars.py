@@ -80,10 +80,11 @@ for lag in [0,1,2,3,4,5]:
     data[lag] = pd.read_csv (filenames_all[lag],
                              sep=' ', header=None) #, dtype=np.int32)
     dict_attr_codes_count["lag "+str(lag)] =  data[lag].sum(axis=0) / (np.array(list(Codes.keys()))+lag)
+    data[lag] = 0
 
 df_attr_summary_count = pd.DataFrame.from_dict(dict_attr_codes_count)
 df_attr_summary_count.index = Codes.keys()
-#df_attr_summary_count.to_csv(save_path + "All_CR_Attr_Summary_Count_Corrected.csv", sep=",")
+df_attr_summary_count.to_csv(save_path + f"All_{region}_Attr_Summary_Count_Corrected.csv", sep=" ")
 print (df_attr_summary_count)
 
 # Sumamary table
