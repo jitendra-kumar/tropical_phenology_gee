@@ -42,7 +42,7 @@ phenometrics_probav=pd.read_csv("costa_rica_panama.phen_params.seasonality.2022.
 dict_seasonality = []
 
 for index, row in phenometrics_probav.iterrows():
-	if row["label"] != "None":
+	if row["label"] != "None1":
 		dict_seasonality.append({"label" : row["label"], 
 			                  "mean": row["mean"], 
 							  "med": row["median"], 

@@ -3,15 +3,17 @@
 export GISRC=/home/jbk/.grassrc7.chrysaor
 grasscr earth_engine costa_rica_panama
 
-UNIVAR_BY_CLUSTER=0
+UNIVAR_BY_CLUSTER=1
 UNIVAR_BY_PROBAV=1
 
 if [ $UNIVAR_BY_CLUSTER -eq 1 ]
 then
 
 g.region rast=costa_rica_panama_interp.2017-2022.h10.2017
+r.mask -r
 r.mask rast=costa_rica_panama_interp.2017-2022.h10.2017 maskcats="2 thru 8"
-r.univar -et percentile=5,10,90,95 sep=comma map=panama.phen_params.seasonality.2022,costa_rica.phen_params.seasonality.2022 zones=costa_rica_panama_interp.2017-2022.h10.2017 output=costa_rica_panama.phen_params.seasonality.2022.h10.univar 
+r.univar -et percentile=5,10,90,95 sep=comma map=panama.phen_params.seasonality.2022,costa_rica.phen_params.seasonality.2022 zones=costa_rica_panama_interp.2017-2022.h10.2017 output=costa_rica_panama.phen_params.seasonality.2022.h10.univar --o
+r.mask -r
 
 fi
 
@@ -20,9 +22,12 @@ then
 
 
 g.region rast=costa_rica_panama_interp.2017-2022.h10.2017
+r.mask -r
 r.mask rast=costa_rica_panama_interp.2017-2022.h10.2017 maskcats="2 thru 8"
-r.univar -et percentile=5,10,90,95 sep=comma map=panama.phen_params.seasonality.2022,costa_rica.phen_params.seasonality.2022 zones=PROBAV_LC100_global_v3.0.1_2019 output=costa_rica_panama.phen_params.seasonality.2022.probav.univar 
+r.univar -et percentile=5,10,90,95 sep=comma map=panama.phen_params.seasonality.2022,costa_rica.phen_params.seasonality.2022 zones=PROBAV_LC100_global_v3.0.1_2019 output=costa_rica_panama.phen_params.seasonality.2022.probav.univar --o
+r.mask -r
 
+sed -i 's/None/None1/g' costa_rica_panama.phen_params.seasonality.2022.probav.univar
 sed -i 's/Shrubs/SHR/g' costa_rica_panama.phen_params.seasonality.2022.probav.univar
 sed -i 's/Herbaceous_vegetation/HERB/g' costa_rica_panama.phen_params.seasonality.2022.probav.univar
 sed -i 's+Cultivated_and_managed_vegetation/agriculture_(cropland)+CROP+g' costa_rica_panama.phen_params.seasonality.2022.probav.univar
